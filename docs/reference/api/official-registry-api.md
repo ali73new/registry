@@ -14,6 +14,28 @@ This API is based on the [generic registry API](./generic-registry-api.md) with 
 - **[Live API Docs](https://registry.modelcontextprotocol.io/docs)** - Stoplight elements with try-it-now functionality
 - **[OpenAPI Spec](https://registry.modelcontextprotocol.io/openapi.yaml)** - Complete machine-readable specification
 
+## Rate Limiting
+
+The official registry enforces rate limits to protect against abuse:
+
+- **60 requests per minute** per IP address
+- **1,000 requests per hour** per IP address
+
+When rate limited, the API returns HTTP `429 Too Many Requests` with a `Retry-After: 60` header. The response body follows the [RFC 7807](https://tools.ietf.org/html/rfc7807) problem details format:
+
+```json
+{
+  "title": "Too Many Requests",
+  "status": 429,
+  "detail": "Rate limit exceeded. Please reduce request frequency and retry after some time."
+}
+```
+
+**Notes:**
+- Rate limits are approximate due to the multi-replica deployment architecture
+- The `/health`, `/ping`, and `/metrics` endpoints are not rate limited
+- Clients should implement exponential backoff when receiving 429 responses
+
 ## Extensions
 
 The official registry implements the [Generic Registry API](./generic-registry-api.md) with the following specific configurations and extensions:

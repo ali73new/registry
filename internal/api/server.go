@@ -72,7 +72,9 @@ func NewServer(cfg *config.Config, registryService service.RegistryService, metr
 	// Order: TrailingSlash -> RateLimit -> CORS -> Mux
 	handler := corsHandler.Handler(mux)
 
-	// Initialize rate limiter if enabled
+	// Initialize rate limiter if enabled.
+	// Note: Rate limits are enforced per-pod, so in multi-replica deployments the
+	// effective limits are approximate (e.g., 2 replicas = up to 2x the configured rate).
 	var rateLimiter *ratelimit.RateLimiter
 	if cfg.RateLimitEnabled {
 		rateLimitConfig := ratelimit.Config{
