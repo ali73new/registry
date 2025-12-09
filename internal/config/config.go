@@ -24,6 +24,11 @@ type Config struct {
 	OIDCExtraClaims  string `env:"OIDC_EXTRA_CLAIMS" envDefault:""`
 	OIDCEditPerms    string `env:"OIDC_EDIT_PERMISSIONS" envDefault:""`
 	OIDCPublishPerms string `env:"OIDC_PUBLISH_PERMISSIONS" envDefault:""`
+
+	// Rate Limiting Configuration
+	RateLimitEnabled           bool `env:"RATE_LIMIT_ENABLED" envDefault:"true"`
+	RateLimitRequestsPerMinute int  `env:"RATE_LIMIT_REQUESTS_PER_MINUTE" envDefault:"60"`
+	RateLimitRequestsPerHour   int  `env:"RATE_LIMIT_REQUESTS_PER_HOUR" envDefault:"1000"`
 }
 
 // NewConfig creates a new configuration with default values

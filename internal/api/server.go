@@ -11,6 +11,7 @@ import (
 	"github.com/rs/cors"
 
 	v0 "github.com/modelcontextprotocol/registry/internal/api/handlers/v0"
+	"github.com/modelcontextprotocol/registry/internal/api/ratelimit"
 	"github.com/modelcontextprotocol/registry/internal/api/router"
 	"github.com/modelcontextprotocol/registry/internal/config"
 	"github.com/modelcontextprotocol/registry/internal/service"
@@ -37,10 +38,11 @@ func TrailingSlashMiddleware(next http.Handler) http.Handler {
 
 // Server represents the HTTP server
 type Server struct {
-	config   *config.Config
-	registry service.RegistryService
-	humaAPI  huma.API
-	server   *http.Server
+	config      *config.Config
+	registry    service.RegistryService
+	humaAPI     huma.API
+	server      *http.Server
+	rateLimiter *ratelimit.RateLimiter
 }
 
 // NewServer creates a new HTTP server
@@ -67,13 +69,31 @@ func NewServer(cfg *config.Config, registryService service.RegistryService, metr
 	})
 
 	// Wrap the mux with middleware stack
-	// Order: TrailingSlash -> CORS -> Mux
-	handler := TrailingSlashMiddleware(corsHandler.Handler(mux))
+	// Order: TrailingSlash -> RateLimit -> CORS -> Mux
+	handler := corsHandler.Handler(mux)
+
+	// Initialize rate limiter if enabled
+	var rateLimiter *ratelimit.RateLimiter
+	if cfg.RateLimitEnabled {
+		rateLimitConfig := ratelimit.Config{
+			RequestsPerMinute: cfg.RateLimitRequestsPerMinute,
+			RequestsPerHour:   cfg.RateLimitRequestsPerHour,
+			CleanupInterval:   10 * time.Minute,
+			SkipPaths:         []string{"/health", "/ping", "/metrics"},
+		}
+		rateLimiter = ratelimit.New(rateLimitConfig)
+		handler = rateLimiter.Middleware(handler)
+		log.Printf("Rate limiting enabled: %d req/min, %d req/hour per IP",
+			cfg.RateLimitRequestsPerMinute, cfg.RateLimitRequestsPerHour)
+	}
+
+	handler = TrailingSlashMiddleware(handler)
 
 	server := &Server{
-		config:   cfg,
-		registry: registryService,
-		humaAPI:  api,
+		config:      cfg,
+		registry:    registryService,
+		humaAPI:     api,
+		rateLimiter: rateLimiter,
 		server: &http.Server{
 			Addr:              cfg.ServerAddress,
 			Handler:           handler,
@@ -92,5 +112,9 @@ func (s *Server) Start() error {
 
 // Shutdown gracefully shuts down the server
 func (s *Server) Shutdown(ctx context.Context) error {
+	// Stop rate limiter cleanup goroutine
+	if s.rateLimiter != nil {
+		s.rateLimiter.Stop()
+	}
 	return s.server.Shutdown(ctx)
 }
