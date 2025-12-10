@@ -2,7 +2,7 @@
 
 Complete command reference for the `mcp-publisher` CLI tool.
 
-See the [publishing guide](../../guides/publishing/publish-server.md) for a walkthrough of using the CLI to publish a server.
+See the [publishing guide](../../modelcontextprotocol-io/quickstart.mdx) for a walkthrough of using the CLI to publish a server.
 
 ## Installation
 
@@ -72,7 +72,7 @@ mcp-publisher login github-oidc [--registry=URL]
 - Requires `id-token: write` permission in workflow
 - No browser interaction needed
 
-Also see [the guide to publishing from GitHub Actions](../../guides/publishing/github-actions.md).
+Also see [the guide to publishing from GitHub Actions](../../modelcontextprotocol-io/github-actions.mdx).
 
 #### DNS Verification
 ```bash
@@ -211,34 +211,30 @@ mcp-publisher login none [--registry=URL]
 
 Publish server to the registry.
 
-For detailed guidance on the publishing process, see the [publishing guide](../../guides/publishing/publish-server.md).
+For detailed guidance on the publishing process, see the [publishing guide](../../modelcontextprotocol-io/quickstart.mdx).
 
 **Usage:**
 ```bash
-mcp-publisher publish [options]
+mcp-publisher publish [PATH]
 ```
 
 **Options:**
-- `--file=PATH` - Path to server.json (default: `./server.json`)
-- `--registry=URL` - Registry URL override
-- `--dry-run` - Validate without publishing
+- `PATH` - Path to server.json (default: `./server.json`)
 
 **Process:**
 1. Validates `server.json` against schema
-2. Verifies package ownership (see [Official Registry Requirements](../server-json/official-registry-requirements.md))
-3. Checks namespace authentication
-4. Publishes to registry
+2. Publishes the `server.json` to the registry server URL specified in the login token
+3. Server: Verifies package ownership (see [Official Registry Requirements](../server-json/official-registry-requirements.md))
+4. Server: Checks namespace authentication
+5. Server: Publishes to registry
 
 **Example:**
 ```bash
 # Basic publish
 mcp-publisher publish
 
-# Dry run validation
-mcp-publisher publish --dry-run
-
 # Custom file location  
-mcp-publisher publish --file=./config/server.json
+mcp-publisher publish ./config/server.json
 ```
 
 ### `mcp-publisher logout`

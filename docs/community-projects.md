@@ -14,7 +14,7 @@ Browse the official MCP Registry in your browser!
 
 ### MCP Registry Clients
 
-- [REST API](guides/consuming/use-rest-api.md) - HTTP API
+- [REST API](modelcontextprotocol-io/registry-aggregators.mdx) - HTTP API
 - [go-mcp-registry](https://github.com/leefowlercu/go-mcp-registry) - Go SDK
 - [mcp-registry-spec-sdk](https://www.npmjs.com/package/mcp-registry-spec-sdk) - TypeScript client for the MCP Registry
 - [LangChain4j MCP Registry Java client](https://docs.langchain4j.dev/tutorials/mcp/#mcp-registry-client) - Java API 
