@@ -1,3 +1,6 @@
+
+
+
 # MCP Registry Documentation
 
 The MCP registry provides MCP clients with a list of MCP servers, like an app store for MCP servers.
